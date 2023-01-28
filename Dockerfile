@@ -14,5 +14,5 @@ RUN pip install -r requirements.txt
 # Configure the container to run in an executed manner
 ENTRYPOINT [ "python" ]
 
-# Run redeye
+# Run finBot
 CMD ["finBot.py"]
