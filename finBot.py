@@ -4,7 +4,7 @@ from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes, Messa
 from telegram.ext import CommandHandler, CallbackQueryHandler, ConversationHandler, filters
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from dotenv import load_dotenv
-from responses import FIXED_CHARGES_CATEGORY, HEADER_FIXED_CHARGES, HE
+from responses import FIXED_CHARGES_CATEGORY, FIXED_INCOME_CATEGORY, HEADER_FIXED_CHARGES, HEADER_FIXED_INCOME, HE
 from warnings import filterwarnings
 from telegram.warnings import PTBUserWarning
 import helper
@@ -21,6 +21,9 @@ STEP_1_CATEGORY    = 0
 STEP_1_OTHER       = 1
 STEP_2_SERVICE     = 2
 STEP_3_COST        = 3
+STEP_1_CATEGORY_INCOME = 11
+STEP_1_OTHER_INCOME    = 12
+STEP_2_COST_INCOME     = 13
 
 
 current_payment = {
@@ -30,40 +33,69 @@ current_payment = {
     "date"     : None
 }
 
+current_income = {
+    "service"   : None,
+    "cost"      : None,
+    "date"      : None
+}
 
-def main_menu_message():
+
+def fixed_charge_message():
   return HEADER_FIXED_CHARGES
 
 
-async def add(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(main_menu_message(), reply_markup=service_menu())
+def fixed_income_message():
+  return HEADER_FIXED_INCOME
+
+
+async def out(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(fixed_charge_message(), reply_markup=service_menu())
     return STEP_1_CATEGORY
+
+
+async def income(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(fixed_income_message(), reply_markup=income_menu())
+    return STEP_1_CATEGORY_INCOME
 
 
 async def fuel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     global current_payment
-    current_payment["category"] = FIXED_CHARGES_CATEGORY['fuel']
+    current_payment["category"] = FIXED_CHARGES_CATEGORY['Fuel']
     await update.callback_query.message.reply_text(HE.get('service_name'))
     return STEP_2_SERVICE
 
 
 async def food(update: Update, context: ContextTypes.DEFAULT_TYPE):
     global current_payment
-    current_payment["category"] = FIXED_CHARGES_CATEGORY['food']
+    current_payment["category"] = FIXED_CHARGES_CATEGORY['Food']
     await update.callback_query.message.reply_text(HE.get('service_name'))
     return STEP_2_SERVICE
 
 
 async def clothes(update: Update, context: ContextTypes.DEFAULT_TYPE):
     global current_payment
-    current_payment["category"] = FIXED_CHARGES_CATEGORY['clothes']
+    current_payment["category"] = FIXED_CHARGES_CATEGORY['Clothes']
     await update.callback_query.message.reply_text(HE.get('service_name'))
     return STEP_2_SERVICE
 
 
 async def tech(update: Update, context: ContextTypes.DEFAULT_TYPE):
     global current_payment
-    current_payment["category"] = FIXED_CHARGES_CATEGORY['tech']
+    current_payment["category"] = FIXED_CHARGES_CATEGORY['Tech']
+    await update.callback_query.message.reply_text(HE.get('service_name'))
+    return STEP_2_SERVICE
+
+
+async def groceries(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    global current_payment
+    current_payment["category"] = FIXED_CHARGES_CATEGORY['Groceries']
+    await update.callback_query.message.reply_text(HE.get('service_name'))
+    return STEP_2_SERVICE
+
+
+async def hangouts(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    global current_payment
+    current_payment["category"] = FIXED_CHARGES_CATEGORY['Hangouts']
     await update.callback_query.message.reply_text(HE.get('service_name'))
     return STEP_2_SERVICE
 
@@ -75,10 +107,52 @@ async def other(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 def service_menu():
     services = []
-    for index,charge in enumerate(FIXED_CHARGES_CATEGORY):
+    for charge in FIXED_CHARGES_CATEGORY:
         services.append([InlineKeyboardButton(FIXED_CHARGES_CATEGORY[charge], callback_data=charge)])
     
     return InlineKeyboardMarkup(services)
+
+
+def income_menu():
+    incomes = []
+    for income in FIXED_INCOME_CATEGORY:
+        incomes.append([InlineKeyboardButton(FIXED_INCOME_CATEGORY[income], callback_data=income)])
+    
+    return InlineKeyboardMarkup(incomes)
+
+
+async def bit(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    global current_income
+    current_income["service"] = FIXED_INCOME_CATEGORY['Bit']
+    await update.callback_query.message.reply_text(HE.get('income_amount'))
+    return STEP_2_COST_INCOME
+
+
+async def salary(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    global current_income
+    current_income["service"] = FIXED_INCOME_CATEGORY['Salary']
+    await update.callback_query.message.reply_text(HE.get('income_amount'))
+    return STEP_2_COST_INCOME
+
+
+async def other_income(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.callback_query.message.reply_text(HE.get('income_service'))
+    return STEP_1_OTHER_INCOME
+
+
+async def get_service_income(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    global current_income
+    current_income['service'] = update.message.text
+    await update.message.reply_text(HE.get('income_amount'))
+    return STEP_2_COST_INCOME
+
+
+async def get_cost_income(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    global current_income
+    current_income['cost'] = update.message.text
+    current_income['date'] = helper.get_date()
+    await update.message.reply_text(f"{HE.get('income_completed')}\n{HE.get('service')}: {current_income['service']}\n{HE.get('cost')}: {current_income['cost']}\n{HE.get('date')}: {current_income['date']}\n.")
+    return ConversationHandler.END
 
 
 async def get_cost(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -113,15 +187,17 @@ async def author(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 app = ApplicationBuilder().token(BOT_TOKEN).build()
 
-CH = ConversationHandler (
-    entry_points = [CommandHandler("add", add)],
+OUTCOME = ConversationHandler (
+    entry_points = [CommandHandler("out", out)],
      states = {
         STEP_1_CATEGORY : [
-            CallbackQueryHandler(fuel, pattern='fuel'),
-            CallbackQueryHandler(food, pattern='food'),
-            CallbackQueryHandler(clothes, pattern='clothes'),
-            CallbackQueryHandler(tech, pattern='tech'),
-            CallbackQueryHandler(other, pattern='other')
+            CallbackQueryHandler(fuel, pattern='Fuel'),
+            CallbackQueryHandler(food, pattern='Food'),
+            CallbackQueryHandler(clothes, pattern='Clothes'),
+            CallbackQueryHandler(tech, pattern='Tech'),
+            CallbackQueryHandler(groceries, pattern='Groceries'),
+            CallbackQueryHandler(hangouts, pattern='Hangouts'),
+            CallbackQueryHandler(other, pattern='Other')
         ],
         STEP_1_OTHER: [
             MessageHandler(filters.ALL , get_category)
@@ -133,10 +209,28 @@ CH = ConversationHandler (
             MessageHandler(filters.ALL , get_cost)
         ]
     }
-    , fallbacks=[CommandHandler("add", add)], allow_reentry=True)
+    , fallbacks=[CommandHandler("out", out)], allow_reentry=True)
 
 
-app.add_handler(CH)
+INCOME = ConversationHandler (
+    entry_points = [CommandHandler("in", income)],
+     states = {
+        STEP_1_CATEGORY_INCOME : [
+            CallbackQueryHandler(bit, pattern='Bit'),
+            CallbackQueryHandler(salary, pattern='Salary'),
+            CallbackQueryHandler(other_income, pattern='Other')
+        ],
+        STEP_1_OTHER_INCOME: [
+            MessageHandler(filters.ALL , get_service_income)
+        ],
+        STEP_2_COST_INCOME : [
+            MessageHandler(filters.ALL , get_cost_income)
+        ]
+    }
+    , fallbacks=[CommandHandler("in", income)], allow_reentry=True)
+
+app.add_handler(OUTCOME)
+app.add_handler(INCOME)
 app.add_handler(CommandHandler("help", help))
 app.add_handler(CommandHandler("author", author))
 app.run_polling()

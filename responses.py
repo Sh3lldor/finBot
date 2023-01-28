@@ -1,11 +1,20 @@
 HEADER_FIXED_CHARGES = "בחר את  השירות המבוקש"
+HEADER_FIXED_INCOME = "בחר את ההכנסה"
 
 FIXED_CHARGES_CATEGORY = {
-    "fuel": "דלק",
-    "food": "אוכל",
-    "clothes": "בגדים",
-    "tech": "טכנולוגיה",
-    "other": "אחר"
+    "Fuel": "דלק",
+    "Food": "אוכל",
+    "Clothes": "בגדים",
+    "Tech": "טכנולוגיה",
+    "Groceries": "מצרכים",
+    "Hangouts": "בילוי",
+    "Other": "אחר"
+}
+
+FIXED_INCOME_CATEGORY = {
+    "Bit": "ביט",
+    "Salary": "משכורת",
+    "Other": "אחר"
 }
 
 HE = {
@@ -13,10 +22,13 @@ HE = {
     "completed": "העסקה הוזנה בהצלחה.\n",
     "other_category": "הכנס שם קטגוריה",
     "service_name": "הכנס שם שירות",
+    "income_amount": "הכנס את גודל ההכנסה",
+    "income_service": "הכנס את שם ההכנסה",
+    "income_completed": "ההכנסה הוזנה בהצלחה",
     "category": "קטגוריה",
     "service": "שירות",
     "cost":"מחיר",
     "date": "תאריך",
-    "help": "מערכת לניהול הוצאות.\nהקלד /add להוספת חיוב חדש\nהקלד /help להצגת הודעה זאת\nהקלד /author להצגת זכויות יוצרים\n.",
+    "help": "מערכת לניהול הוצאות.\nהקלד /out להוספת חיוב חדש\nהקלד /in להכנסת הכנסת חדשה\nהקלד /help להצגת הודעה זאת\nהקלד /author להצגת זכויות יוצרים\n.",
     "author": "@elad_pt | 2023"
 }
