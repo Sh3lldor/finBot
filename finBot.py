@@ -37,8 +37,10 @@ current_payment = {
 }
 
 current_income = {
+    "category" : "↕️ Account Transfer",
     "service"   : None,
     "cost"      : None,
+    "method"    : "💳 Credit Card",
     "date"      : None
 }
 
@@ -144,6 +146,14 @@ async def salary(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return STEP_2_COST_INCOME
 
 
+async def savings(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    global current_income
+    current_income["service"] = FIXED_INCOME_CATEGORY['Savings']
+    current_income['method'] = '🏦 Savings'
+    await update.callback_query.message.reply_text(HE.get('income_amount'))
+    return STEP_2_COST_INCOME
+
+
 async def other_income(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.callback_query.message.reply_text(HE.get('income_service'))
     return STEP_1_OTHER_INCOME
@@ -162,7 +172,10 @@ async def get_cost_income(update: Update, context: ContextTypes.DEFAULT_TYPE):
     current_income['date'] = helper.get_date()
     await update.message.reply_text(f"{HE.get('income_completed')}\n{HE.get('service')}: {current_income['service']}\n{HE.get('cost')}: {current_income['cost']}\n{HE.get('date')}: {current_income['date']}\n.")
     if auth_user(update):
-        add_income(current_income)
+        if current_income['method'] == '🏦 Savings':
+            # Saving goes from income to savings as an outcome
+            add_income(current_income)
+            add_outcome(current_income)
     return ConversationHandler.END
 
 
@@ -238,6 +251,7 @@ INCOME = ConversationHandler (
         STEP_1_CATEGORY_INCOME : [
             CallbackQueryHandler(bit, pattern='Bit'),
             CallbackQueryHandler(salary, pattern='Salary'),
+            CallbackQueryHandler(savings, pattern='Savings'),
             CallbackQueryHandler(other_income, pattern='Other')
         ],
         STEP_1_OTHER_INCOME: [

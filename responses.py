@@ -14,6 +14,7 @@ FIXED_CHARGES_CATEGORY = {
 FIXED_INCOME_CATEGORY = {
     "Bit": "ביט",
     "Salary": "משכורת",
+    "Savings": "חסכון",
     "Other": "אחר"
 }
 

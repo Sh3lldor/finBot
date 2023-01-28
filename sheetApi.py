@@ -37,5 +37,5 @@ def add_outcome(data):
 
 def add_income(data):
     client = authenticate()
-    outcome_data = [data['date'], '', data['cost'], '↕️ Account Transfer', '💳 Credit Card', data['service'], '✅']
+    outcome_data = [data['date'], '', data['cost'], data['category'], data['method'], data['service'], '✅']
     write_data(client,outcome_data)
