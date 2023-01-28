@@ -8,6 +8,7 @@ from responses import FIXED_CHARGES_CATEGORY, FIXED_INCOME_CATEGORY, HEADER_FIXE
 from warnings import filterwarnings
 from telegram.warnings import PTBUserWarning
 import helper
+from sheetApi import add_income, add_outcome
 
 # Load env
 load_dotenv()
@@ -16,7 +17,8 @@ load_dotenv()
 filterwarnings(action="ignore", message=r".*CallbackQueryHandler", category=PTBUserWarning)
 
 # ENV
-BOT_TOKEN = os.getenv('BOT_TOKEN')
+BOT_TOKEN = os.getenv('BOT_TOKEN_PROD')
+AUTH_USER_ID = int(os.getenv('AUTH_USER_ID'))
 STEP_1_CATEGORY    = 0
 STEP_1_OTHER       = 1
 STEP_2_SERVICE     = 2
@@ -28,6 +30,7 @@ STEP_2_COST_INCOME     = 13
 
 current_payment = {
     "category" : None,
+    "category_display_name": None,
     "service"  : None,
     "cost"     : None,
     "date"     : None
@@ -60,42 +63,48 @@ async def income(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def fuel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     global current_payment
-    current_payment["category"] = FIXED_CHARGES_CATEGORY['Fuel']
+    current_payment["category"] = 'Fuel'
+    current_payment['category_display_name'] = FIXED_CHARGES_CATEGORY['Fuel']
     await update.callback_query.message.reply_text(HE.get('service_name'))
     return STEP_2_SERVICE
 
 
 async def food(update: Update, context: ContextTypes.DEFAULT_TYPE):
     global current_payment
-    current_payment["category"] = FIXED_CHARGES_CATEGORY['Food']
+    current_payment["category"] = 'Food'
+    current_payment['category_display_name'] = FIXED_CHARGES_CATEGORY['Food']
     await update.callback_query.message.reply_text(HE.get('service_name'))
     return STEP_2_SERVICE
 
 
 async def clothes(update: Update, context: ContextTypes.DEFAULT_TYPE):
     global current_payment
-    current_payment["category"] = FIXED_CHARGES_CATEGORY['Clothes']
+    current_payment["category"] = 'Clothes'
+    current_payment['category_display_name'] = FIXED_CHARGES_CATEGORY['Clothes']
     await update.callback_query.message.reply_text(HE.get('service_name'))
     return STEP_2_SERVICE
 
 
 async def tech(update: Update, context: ContextTypes.DEFAULT_TYPE):
     global current_payment
-    current_payment["category"] = FIXED_CHARGES_CATEGORY['Tech']
+    current_payment["category"] = 'Tech'
+    current_payment['category_display_name'] = FIXED_CHARGES_CATEGORY['Tech']
     await update.callback_query.message.reply_text(HE.get('service_name'))
     return STEP_2_SERVICE
 
 
 async def groceries(update: Update, context: ContextTypes.DEFAULT_TYPE):
     global current_payment
-    current_payment["category"] = FIXED_CHARGES_CATEGORY['Groceries']
+    current_payment["category"] = 'Groceries'
+    current_payment['category_display_name'] = FIXED_CHARGES_CATEGORY['Groceries']
     await update.callback_query.message.reply_text(HE.get('service_name'))
     return STEP_2_SERVICE
 
 
 async def hangouts(update: Update, context: ContextTypes.DEFAULT_TYPE):
     global current_payment
-    current_payment["category"] = FIXED_CHARGES_CATEGORY['Hangouts']
+    current_payment["category"] = 'Hangouts'
+    current_payment['category_display_name'] = FIXED_CHARGES_CATEGORY['Hangouts']
     await update.callback_query.message.reply_text(HE.get('service_name'))
     return STEP_2_SERVICE
 
@@ -152,6 +161,8 @@ async def get_cost_income(update: Update, context: ContextTypes.DEFAULT_TYPE):
     current_income['cost'] = update.message.text
     current_income['date'] = helper.get_date()
     await update.message.reply_text(f"{HE.get('income_completed')}\n{HE.get('service')}: {current_income['service']}\n{HE.get('cost')}: {current_income['cost']}\n{HE.get('date')}: {current_income['date']}\n.")
+    if auth_user(update):
+        add_income(current_income)
     return ConversationHandler.END
 
 
@@ -159,7 +170,9 @@ async def get_cost(update: Update, context: ContextTypes.DEFAULT_TYPE):
     global current_payment
     current_payment['cost'] = update.message.text
     current_payment['date'] = helper.get_date()
-    await update.message.reply_text(f"{HE.get('completed')}\n{HE.get('category')}: {current_payment['category']}\n{HE.get('service')}: {current_payment['service']}\n{HE.get('cost')}: {current_payment['cost']}\n{HE.get('date')}: {current_payment['date']}\n.")
+    await update.message.reply_text(f"{HE.get('completed')}\n{HE.get('category')}: {current_payment['category_display_name']}\n{HE.get('service')}: {current_payment['service']}\n{HE.get('cost')}: {current_payment['cost']}\n{HE.get('date')}: {current_payment['date']}\n.")
+    if auth_user(update):
+        add_outcome(current_payment)
     return ConversationHandler.END
 
 
@@ -172,7 +185,8 @@ async def get_service(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def get_category(update: Update, context: ContextTypes.DEFAULT_TYPE):
     global current_payment
-    current_payment['category'] = update.message.text
+    current_payment['category'] = 'Other'
+    current_payment['category_display_name'] = update.message.text
     await update.message.reply_text(HE.get('service_name'))
     return STEP_2_SERVICE
 
@@ -184,6 +198,12 @@ async def help(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def author(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(HE.get('author'))
 
+
+def auth_user(update):
+    if update.message.from_user.id != AUTH_USER_ID:
+        return False
+
+    return True
 
 app = ApplicationBuilder().token(BOT_TOKEN).build()
 
