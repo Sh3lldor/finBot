@@ -15,11 +15,10 @@ Telegram bot that saves all of your expenses to Google Sheets.
   - [Credits](#credits)
 
 ## Intro
-This telegram bot will allow you to update Google sheets.
+This telegram bot saves all of your expenses to Google Sheets. Including: income, outcome and savings.</br>
 You will need:
 1) Get an access token for Google Sheets and rename it to `token.json`
 2) Edit `.env` file with your personal information
-
 
 ## Language
 Language settings can be changed via the `responses.py` file.
