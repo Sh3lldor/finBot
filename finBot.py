@@ -165,7 +165,7 @@ async def get_cost_income(update: Update, context: ContextTypes.DEFAULT_TYPE):
             add_income(current_income)
             add_outcome(current_income)
         else:
-            add_outcome(current_income)
+            add_income(current_income)
 
     current_income = helper.init_income()
 
@@ -181,7 +181,7 @@ async def get_cost(update: Update, context: ContextTypes.DEFAULT_TYPE):
         add_outcome(current_payment)
 
     current_payment = helper.init_outcome()
-    
+
     return ConversationHandler.END
 
 
