@@ -28,21 +28,9 @@ STEP_1_OTHER_INCOME    = 12
 STEP_2_COST_INCOME     = 13
 
 
-current_payment = {
-    "category" : None,
-    "category_display_name": None,
-    "service"  : None,
-    "cost"     : None,
-    "date"     : None
-}
+current_payment = helper.init_outcome()
 
-current_income = {
-    "category" : "↕️ Account Transfer",
-    "service"   : None,
-    "cost"      : None,
-    "method"    : "💳 Credit Card",
-    "date"      : None
-}
+current_income = helper.init_income()
 
 
 def fixed_charge_message():
@@ -176,6 +164,11 @@ async def get_cost_income(update: Update, context: ContextTypes.DEFAULT_TYPE):
             # Saving goes from income to savings as an outcome
             add_income(current_income)
             add_outcome(current_income)
+        else:
+            add_outcome(current_income)
+
+    current_income = helper.init_income()
+
     return ConversationHandler.END
 
 
@@ -186,6 +179,9 @@ async def get_cost(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(f"{HE.get('completed')}\n{HE.get('category')}: {current_payment['category_display_name']}\n{HE.get('service')}: {current_payment['service']}\n{HE.get('cost')}: {current_payment['cost']}\n{HE.get('date')}: {current_payment['date']}\n.")
     if auth_user(update):
         add_outcome(current_payment)
+
+    current_payment = helper.init_outcome()
+    
     return ConversationHandler.END
 
 
