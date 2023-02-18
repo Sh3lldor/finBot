@@ -8,6 +8,7 @@ FIXED_CHARGES_CATEGORY = {
     "Tech": "טכנולוגיה",
     "Groceries": "מצרכים",
     "Hangouts": "בילוי",
+    "Transportation": "תחבורה",
     "Other": "אחר"
 }
 

@@ -99,6 +99,14 @@ async def hangouts(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return STEP_2_SERVICE
 
 
+async def transportation(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    global current_payment
+    current_payment["category"] = 'Transportation'
+    current_payment['category_display_name'] = FIXED_CHARGES_CATEGORY['Transportation']
+    await update.callback_query.message.reply_text(HE.get('service_name'))
+    return STEP_2_SERVICE
+
+
 async def other(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.callback_query.message.reply_text(HE.get('other_category'))
     return STEP_1_OTHER
@@ -226,6 +234,7 @@ OUTCOME = ConversationHandler (
             CallbackQueryHandler(tech, pattern='Tech'),
             CallbackQueryHandler(groceries, pattern='Groceries'),
             CallbackQueryHandler(hangouts, pattern='Hangouts'),
+            CallbackQueryHandler(transportation, pattern='Transportation'),
             CallbackQueryHandler(other, pattern='Other')
         ],
         STEP_1_OTHER: [
