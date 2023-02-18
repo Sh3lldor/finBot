@@ -8,7 +8,7 @@ def get_date():
 
 def init_income():
     return {
-        "category" : "↕️ Account Transfer",
+        "category" : "Available to budget",
         "service"   : None,
         "cost"      : None,
         "method"    : "💳 Credit Card",
