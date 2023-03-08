@@ -24,3 +24,10 @@ def init_outcome():
         "cost"     : None,
         "date"     : None
     }
+
+
+def get_definition():
+    return {
+        "savings": '🏦 Savings',
+        "account_transfer" : '↕️ Account Transfer'
+    }

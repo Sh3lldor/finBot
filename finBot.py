@@ -145,7 +145,7 @@ async def salary(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def savings(update: Update, context: ContextTypes.DEFAULT_TYPE):
     global current_income
     current_income["service"] = FIXED_INCOME_CATEGORY['Savings']
-    current_income['method'] = '🏦 Savings'
+    current_income['method'] = helper.get_definition().get('savings')
     await update.callback_query.message.reply_text(HE.get('income_amount'))
     return STEP_2_COST_INCOME
 
@@ -168,9 +168,10 @@ async def get_cost_income(update: Update, context: ContextTypes.DEFAULT_TYPE):
     current_income['date'] = helper.get_date()
     await update.message.reply_text(f"{HE.get('income_completed')}\n{HE.get('service')}: {current_income['service']}\n{HE.get('cost')}: {current_income['cost']}\n{HE.get('date')}: {current_income['date']}\n.")
     if auth_user(update):
-        if current_income['method'] == '🏦 Savings':
+        if current_income['method'] == helper.get_definition().get('savings'):
             # Saving goes from income to savings as an outcome
             add_income(current_income)
+            current_income['category'] = helper.get_definition().get('account_transfer')
             add_outcome(current_income)
         else:
             add_income(current_income)
